@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <style>
+      body {
+        background-color: gray;
+      }
+    </style>
+
+    <title>Document</title>
+  </head>
+  <body>
+    <canvas id="canvas" style="background-color: white; width: 500px; height: 500px" width="500px" height="500px"></canvas>
+  </body>
+  <script>
+    var canvas = document.getElementById("canvas");
+    var gravity = { x: 0, y: 0 };
+    var ballPos = { x: 250, y: 250 };
+    window.addEventListener("deviceorientation", Orientation, true);
+
+    function clamp(value, min, max) {
+      return Math.max(min, Math.min(value, max));
+    }
+    function Orientation(e) {
+      if (e.gamma && e.beta) {
+        gravity = { x: e.gamma / 90, y: clamp(e.beta, -90, 90) / 90 };
+      }
+    }
+    function update() {
+      canvas = document.getElementById("canvas");
+      context = canvas.getContext("2d");
+      if (context) {
+        context.clearRect(0, 0, context.canvas.width, context.canvas.height);
+
+        // Circle
+        context.beginPath();
+        context.arc(250, 250, 40, 0, 2 * Math.PI);
+        context.lineWidth = 1;
+        context.stroke();
+
+        let start = { x: 250, y: 250 };
+        let end = { x: start.x + gravity.x, y: start.y + gravity.y };
+        let vector = { x: end.x - start.x, y: end.y - start.y };
+        let magnitude = Math.sqrt(vector.x * vector.x + vector.y * vector.y);
+        let normalizedVector = { x: vector.x / magnitude, y: vector.y / magnitude };
+
+        // Line
+        context.beginPath();
+        context.moveTo(start.x, start.y);
+        context.lineTo(start.x + normalizedVector.x * 40, start.y + normalizedVector.y * 40);
+        context.stroke();
+
+        // Ball
+        ballPos = { x: clamp(ballPos.x + gravity.x, 0, 500), y: clamp(ballPos.y + gravity.y, 0, 500) };
+        context.beginPath();
+        context.arc(ballPos.x, ballPos.y, 10, 0, 2 * Math.PI);
+        context.fillStyle = "green";
+        context.fill();
+        context.stroke();
+
+        // X Gravity
+        context.beginPath();
+        context.moveTo(start.x, start.y);
+        context.lineTo(start.x + gravity.x * 40, start.y);
+        context.lineWidth = 5;
+        context.stroke();
+
+        // Y Gravity
+        context.beginPath();
+        context.moveTo(start.x, start.y);
+        context.lineTo(start.x, start.y + gravity.y * 40);
+        context.lineWidth = 5;
+        context.stroke();
+      }
+      window.requestAnimationFrame(update);
+    }
+
+    update();
+  </script>
+</html>
